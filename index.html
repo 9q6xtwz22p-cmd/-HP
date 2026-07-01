@@ -3,882 +3,680 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0E0D0C">
+<meta name="theme-color" content="#ffffff">
 <title>A-CRAFT GROUP</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=instrument-sans@400,500,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&family=Noto+Serif+JP:wght@400&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=instrument-sans@300,400,500&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 
 <style>
-/* ─── Reset ─────────────────────────────────────── */
+/* ─── Reset ────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:auto}
-img{display:block;width:100%;height:100%;object-fit:cover}
+img{display:block;object-fit:cover}
 a{color:inherit;text-decoration:none}
+button{background:none;border:none;padding:0;cursor:pointer}
 
-/* ─── Tokens ─────────────────────────────────────── */
+/* ─── Tokens ─────────────────────────── */
 :root{
-  --ink:   #0E0D0C;
-  --cream: #F2EDE6;
-  --stone: #6C6460;
-  --sand:  #C4BBB3;
-  --white: #FAF8F4;
-  --dark:  #141210;
-  --pad:   72px;
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E");
+  --bg:   #ffffff;
+  --ink:  #1A1817;
+  --mid:  #7E7A76;
+  --rule: #E0DCD8;
+  --sb:   52px;
 }
 
-/* ─── Base ───────────────────────────────────────── */
+/* ─── Base ───────────────────────────── */
 body{
   font-family:'Instrument Sans','Noto Sans JP',sans-serif;
-  background:var(--cream);color:var(--ink);overflow-x:hidden;
-}
-.serif{font-family:'Noto Serif JP',serif}
-.noto{font-family:'Noto Sans JP',sans-serif;font-weight:300}
-
-/* ─── Line-reveal ────────────────────────────────── */
-.lm{overflow:hidden;display:block}
-.li{display:block;transform:translateY(108%);will-change:transform}
-
-/* ─── Grain overlay mixin ────────────────────────── */
-.grained{position:relative}
-.grained::after{
-  content:'';position:absolute;inset:0;
-  background:var(--grain) center/256px;
-  opacity:.028;pointer-events:none;mix-blend-mode:overlay;
+  background:var(--bg);color:var(--ink);
+  overflow-x:hidden;
 }
 
-/* ─── Loader ─────────────────────────────────────── */
-#loader{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--dark);
+/* ─── Sidebar ────────────────────────── */
+#sb{
+  position:fixed;
+  top:0;left:0;bottom:0;
+  width:var(--sb);
+  border-right:1px solid var(--rule);
+  background:var(--bg);
+  z-index:500;
+  display:flex;flex-direction:column;align-items:center;
+}
+.sb-top{
+  padding:22px 0 20px;
+  display:flex;flex-direction:column;gap:5px;cursor:pointer;
+}
+.sb-line{width:18px;height:1px;background:var(--ink)}
+.sb-nav{
+  flex:1;
   display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  pointer-events:all;
+  justify-content:center;gap:clamp(22px,3.5vh,36px);
+  padding:0;
 }
-#ld-n{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(7rem,20vw,20rem);
-  font-weight:700;color:var(--white);
-  line-height:1;letter-spacing:-.03em;
-  text-align:center;min-width:3ch;
-}
-#ld-b{
-  margin-top:20px;
-  font-size:11px;letter-spacing:.42em;text-transform:uppercase;
-  color:rgba(255,255,255,.18);overflow:hidden;
-}
-#ld-bi{transform:translateY(100%)}
-#ld-p{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.06)}
-#ld-f{position:absolute;inset:0;right:100%;background:var(--white)}
-
-/* ─── Nav ────────────────────────────────────────── */
-#nav{
-  position:fixed;top:0;left:0;right:0;z-index:800;
-  padding:0 var(--pad);height:64px;
-  display:flex;align-items:center;justify-content:space-between;
-  transition:background .4s,backdrop-filter .4s;
-}
-#nav::after{
-  content:'';position:absolute;bottom:0;left:var(--pad);right:var(--pad);
-  height:1px;background:rgba(255,255,255,.1);transition:background .4s;
-}
-#nav.light{background:rgba(242,237,230,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-#nav.light::after{background:var(--sand)}
-#nav.light .nl{color:var(--ink)}
-#nav.light .nm{color:var(--stone)}
-#nav.light .ni-j{color:rgba(14,13,12,.7)}
-#nav.light .ni-e{color:rgba(14,13,12,.3)}
-#nav.light .ni:hover .ni-j{color:var(--ink)}
-#nav.light .ni:hover .ni-e{color:var(--stone)}
-.nl{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.88);font-weight:500}
-.nav-c{display:flex;gap:32px;position:absolute;left:50%;transform:translateX(-50%)}
-.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
-.ni-j{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.06em;transition:color .3s}
-.ni-e{font-size:10px;letter-spacing:.14em;color:rgba(255,255,255,.26);transition:color .3s}
-.ni:hover .ni-j{color:#fff}
-.ni:hover .ni-e{color:var(--stone)}
-.nm{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.4);cursor:pointer;transition:color .3s}
-.nm:hover{color:#fff}
-
-/* ─── Hero ───────────────────────────────────────── */
-#hero{
-  position:relative;height:100svh;min-height:640px;
-  overflow:hidden;background:var(--dark);
-}
-/* Masonry grid */
-#hgrid{
-  position:absolute;inset:0;
-  display:grid;
-  grid-template-columns:48% 1fr 1fr;
-  grid-template-rows:60% 40%;
-  gap:2px;
-  z-index:0;
-}
-.hm{overflow:hidden;position:relative}
-.hm img{
-  width:100%;height:100%;object-fit:cover;
-  transform:scale(1.06);
-  will-change:transform;
-  transition:transform .1s linear;
-}
-.hm1{grid-column:1;grid-row:1/3}
-.hm2{grid-column:2;grid-row:1}
-.hm3{grid-column:3;grid-row:1}
-.hm4{grid-column:2/4;grid-row:2}
-/* Gradient */
-.hg{
-  position:absolute;inset:0;z-index:1;
-  background:
-    linear-gradient(to bottom,
-      rgba(14,13,12,.28) 0%,
-      rgba(14,13,12,.0)  26%,
-      rgba(14,13,12,.0)  54%,
-      rgba(14,13,12,.56) 74%,
-      rgba(14,13,12,.94) 100%),
-    linear-gradient(to right,
-      rgba(14,13,12,.22) 0%,
-      rgba(14,13,12,.0)  36%);
-}
-/* cinematic grain over WebGL */
-#hero::after{
-  content:'';position:absolute;inset:0;
-  background:var(--grain) center/256px;
-  opacity:.038;pointer-events:none;z-index:3;
-  mix-blend-mode:overlay;
-}
-/* radial edge vignette */
-#hero::before{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:radial-gradient(ellipse 80% 80% at 50% 50%,
-    transparent 30%,rgba(14,13,12,.28) 100%);
-  pointer-events:none;
-}
-/* vertical accent line */
-.hv{
-  position:absolute;left:var(--pad);top:80px;bottom:80px;
-  width:1px;background:rgba(255,255,255,.09);z-index:2;
-}
-/* text */
-.hc{
-  position:absolute;inset:0;z-index:2;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:0 var(--pad) 48px;
-}
-.htag{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(2.4rem,4.6vw,4.8rem);
-  font-weight:400;line-height:1.28;
-  color:var(--white);margin-bottom:44px;
-  text-shadow:0 2px 48px rgba(0,0,0,.44),0 8px 80px rgba(0,0,0,.22);
-  letter-spacing:.02em;
-}
-.hbot{display:flex;align-items:flex-end;justify-content:space-between;opacity:0}
-.hbl{display:flex;flex-direction:column;gap:8px}
-.hco{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.42)}
-.hsc{font-size:11px;letter-spacing:.16em;color:rgba(255,255,255,.22);display:flex;align-items:center;gap:8px}
-.hsc::before{content:'';display:inline-block;width:26px;height:1px;background:currentColor}
-.hcats{display:flex;gap:20px;align-items:center}
-.hcat{font-size:10px;letter-spacing:.14em;color:rgba(255,255,255,.38);font-family:'Instrument Sans','Noto Sans JP',sans-serif;text-transform:uppercase;text-decoration:none}
-.hcat.dim{color:rgba(255,255,255,.14);font-style:italic;letter-spacing:.1em;text-transform:none;font-size:10px}
-.hcats-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.14)}
-
-/* ─── Statement ──────────────────────────────────── */
-#stmt{
-  position:relative;background:var(--cream);overflow:hidden;
-  min-height:100svh;
-  display:grid;grid-template-rows:auto 1fr auto;
-  padding:0 var(--pad);
-  border-top:1px solid var(--sand);
-}
-#stmt::before{
-  content:'';position:absolute;inset:0;
-  background:var(--grain) center/256px;
-  opacity:.026;pointer-events:none;
-}
-.stmt-top{
-  padding-top:clamp(32px,4.5vw,48px);padding-bottom:18px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--sand);
-}
-.stmt-sec{
-  font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--stone);
-  display:flex;align-items:center;gap:16px;
-}
-.stmt-sec-n{color:var(--stone)}
-.stmt-mid{
-  display:flex;align-items:center;
-  padding:clamp(32px,7vw,72px) 0;
-}
-.stmt-h{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(2rem,5.2vw,6rem);
-  font-weight:400;line-height:1.12;
-  letter-spacing:-.01em;
-  color:var(--ink);width:100%;
-}
-.stmt-h .lm{margin-bottom:.05em}
-.stmt-bot{
-  padding-bottom:clamp(32px,4.5vw,48px);padding-top:24px;
-  display:flex;align-items:flex-end;justify-content:space-between;gap:40px;
-  border-top:1px solid var(--sand);flex-wrap:wrap;
-}
-.stmt-body{
+.sb-ni{
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
   font-family:'Noto Sans JP',sans-serif;
-  font-size:13px;line-height:2.2;color:var(--stone);max-width:500px;
+  font-size:11px;letter-spacing:.08em;
+  color:var(--mid);cursor:pointer;
+  transition:color .2s;
+  user-select:none;
 }
-.stmt-yr{font-size:11px;letter-spacing:.22em;color:var(--sand);white-space:nowrap}
-.stmt-wm{
-  position:absolute;right:-.06em;bottom:-.12em;
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(160px,36vw,480px);
-  font-weight:700;color:rgba(14,13,12,.026);
-  line-height:1;pointer-events:none;user-select:none;
+.sb-ni:hover{color:var(--ink)}
+.sb-bot{
+  padding:20px 0 22px;
+  writing-mode:vertical-rl;
+  font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--rule);
 }
 
-/* ─── Section band ───────────────────────────────── */
-.sband{
-  background:var(--ink);
-  padding:17px var(--pad);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.sband-l{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.18)}
-.sband-r{font-size:11px;letter-spacing:.22em;color:var(--stone)}
+/* ─── Page wrap (offset by sidebar) ─── */
+#wrap{margin-left:var(--sb)}
 
-/* ─── Business Pinned ────────────────────────────── */
-#biz-pin{
-  width:100%;height:100svh;
-  overflow:hidden;position:relative;
+/* ─── Hero ───────────────────────────── */
+#hero{
+  height:100svh;
+  display:grid;
+  grid-template-columns:44fr 56fr;
+  border-bottom:1px solid var(--rule);
 }
-#biz-track{
-  display:flex;height:100%;width:400vw;
-  will-change:transform;
-}
-.bp{
-  width:100vw;height:100svh;flex-shrink:0;
-  position:relative;overflow:hidden;
-}
-.bp:nth-child(1){background:var(--cream)}
-.bp:nth-child(2){background:var(--dark)}
-.bp:nth-child(3){background:var(--cream)}
-.bp:nth-child(4){background:#0C0A08}
-.bp:nth-child(odd)::before{
-  content:'';position:absolute;inset:0;
-  background:var(--grain) center/256px;
-  opacity:.024;pointer-events:none;
-}
-/* giant glyph */
-.bg{
-  position:absolute;left:50%;top:50%;
-  transform:translate(-50%,-50%);
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(14rem,42vw,64rem);
-  font-weight:400;line-height:1;
-  pointer-events:none;user-select:none;
-}
-.bp:nth-child(odd) .bg{color:rgba(14,13,12,.04)}
-.bp:nth-child(even) .bg{color:rgba(250,248,244,.03)}
-/* panel content */
-.bc{
-  position:relative;z-index:1;
-  height:100%;display:flex;flex-direction:column;
-  justify-content:center;
-  padding:0 var(--pad);
-}
-.bc-num{
-  font-size:11px;letter-spacing:.32em;text-transform:uppercase;
-  margin-bottom:clamp(20px,3.5vw,40px);
-  display:flex;align-items:center;gap:18px;
-}
-.bp:nth-child(odd) .bc-num{color:var(--stone)}
-.bp:nth-child(even) .bc-num{color:rgba(255,255,255,.26)}
-.bc-num::before{content:'';display:inline-block;width:32px;height:1px}
-.bp:nth-child(odd) .bc-num::before{background:var(--sand)}
-.bp:nth-child(even) .bc-num::before{background:rgba(255,255,255,.16)}
-/* JP name */
-.bc-jp{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(2.8rem,6vw,7rem);
-  font-weight:400;line-height:.96;
-  letter-spacing:-.01em;
-  margin-bottom:clamp(12px,2vw,22px);
+
+/* Left white panel */
+.h-l{
+  display:flex;flex-direction:column;
+  justify-content:space-between;
+  padding:clamp(28px,4.5vw,52px) clamp(24px,4vw,56px);
+  border-right:1px solid var(--rule);
+  position:relative;
   overflow:hidden;
 }
-.bp:nth-child(odd) .bc-jp{color:var(--ink)}
-.bp:nth-child(even) .bc-jp{color:var(--white)}
-.bc-jp-i{display:block;transform:translateY(100%)}
-.bc-rule{width:100%;height:1px;margin-bottom:clamp(12px,2vw,22px)}
-.bp:nth-child(odd) .bc-rule{background:var(--sand)}
-.bp:nth-child(even) .bc-rule{background:rgba(255,255,255,.09)}
-.bc-en{
-  font-size:11px;letter-spacing:.3em;text-transform:uppercase;
-  margin-bottom:clamp(14px,2.5vw,28px);
-}
-.bp:nth-child(odd) .bc-en{color:var(--stone)}
-.bp:nth-child(even) .bc-en{color:rgba(255,255,255,.26)}
-.bc-desc{
-  font-family:'Noto Sans JP',sans-serif;font-size:13px;line-height:2.1;max-width:440px;
-}
-.bp:nth-child(odd) .bc-desc{color:var(--stone)}
-.bp:nth-child(even) .bc-desc{color:rgba(255,255,255,.34)}
-.bc-coming{
-  font-family:'Noto Serif JP',serif;font-size:13px;font-style:italic;
-  letter-spacing:.14em;color:rgba(255,255,255,.2);
-}
-/* top reveal line — dark/light adapts per panel */
-.bp::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  transform:scaleX(0);transform-origin:left;
-  transition:transform .9s cubic-bezier(.16,1,.3,1);
-}
-.bp:nth-child(odd)::after{background:var(--stone)}
-.bp:nth-child(even)::after{background:rgba(255,255,255,.3)}
-.bp.lit::after{transform:scaleX(1)}
-/* HUD */
-#bhud{
-  position:absolute;bottom:clamp(28px,4vw,48px);left:var(--pad);z-index:10;
-  display:flex;align-items:center;gap:13px;pointer-events:none;
-}
-#bprog{width:56px;height:1px;background:rgba(255,255,255,.1);position:relative;overflow:hidden}
-#bpf{position:absolute;inset:0;right:100%;background:var(--stone)}
-#bcur{font-size:11px;letter-spacing:.22em}
-.bscrh{
-  position:absolute;bottom:clamp(28px,4vw,48px);right:var(--pad);z-index:10;
-  font-size:11px;letter-spacing:.2em;text-transform:uppercase;pointer-events:none;
-  display:flex;align-items:center;gap:10px;
-}
-.bscrh::after{content:'';display:inline-block;width:32px;height:1px;background:currentColor}
-
-/* ─── Marquee ─────────────────────────────────────── */
-#mq{background:var(--dark);padding:52px 0;overflow:hidden;border-top:1px solid rgba(255,255,255,.04)}
-.mqt{display:flex;white-space:nowrap}
-.mqti{display:flex;align-items:center;animation:mqs 44s linear infinite}
-@keyframes mqs{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.mqi{display:inline-flex;align-items:center;gap:48px;padding:0 48px}
-.mqj{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(2.4rem,5vw,4.5rem);
-  font-weight:400;color:rgba(250,248,244,.05);
-  white-space:nowrap;letter-spacing:.04em;
-}
-.mqj.hi{color:rgba(250,248,244,.16)}
-.mqs-sep{font-size:1rem;color:rgba(255,255,255,.07)}
-
-/* ─── About ───────────────────────────────────────── */
-#about{
-  position:relative;background:var(--cream);overflow:hidden;
-  padding:clamp(64px,10vw,120px) var(--pad);
-  border-top:1px solid var(--sand);
-  display:grid;grid-template-columns:1fr 1fr;gap:clamp(44px,7vw,92px);align-items:start;
-}
-#about::before{
-  content:'';position:absolute;inset:0;
-  background:var(--grain) center/256px;opacity:.024;pointer-events:none;
-}
-.asec{
-  font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--stone);
-  margin-bottom:44px;display:flex;align-items:center;gap:16px;
-}
-.asec::after{content:'';flex:0 0 32px;height:1px;background:var(--sand)}
-.ahead{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(1.8rem,3vw,3.4rem);
-  font-weight:400;line-height:1.28;color:var(--ink);
-  margin-bottom:clamp(24px,3.5vw,38px);
-  letter-spacing:.01em;
-}
-.abody{
+.h-tagline{
   font-family:'Noto Sans JP',sans-serif;
-  font-size:13px;line-height:2.2;color:var(--stone);
+  font-size:clamp(11px,1.1vw,13px);
+  line-height:2;
+  color:var(--mid);
+  font-weight:300;
+  opacity:0;
 }
-.aright{display:flex;flex-direction:column}
-.sti{
-  padding:32px 0;border-top:1px solid var(--sand);
-  display:flex;align-items:baseline;justify-content:space-between;
-  transition:border-color .4s;
+.h-logo{
+  font-family:'Instrument Sans',sans-serif;
+  font-size:clamp(3.2rem,8.4vw,9.6rem);
+  font-weight:300;
+  letter-spacing:-.025em;
+  color:var(--ink);
+  line-height:.92;
+  opacity:0;
 }
-.sti:first-child{border-top:none;padding-top:0}
-.sti:hover{border-color:var(--stone)}
-.stv{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(2.2rem,3.8vw,4rem);
-  font-weight:400;
-  color:var(--ink);line-height:1;transition:color .4s;
-}
-.sti:hover .stv{color:var(--stone)}
-.stl{font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--stone)}
-
-/* ─── Contact ─────────────────────────────────────── */
-#ct{
-  background:var(--ink);
-  padding:clamp(48px,8vw,96px) var(--pad);
-  display:flex;align-items:center;justify-content:space-between;
-  position:relative;overflow:hidden;cursor:pointer;
-}
-#ct::before{
-  content:'';position:absolute;inset:0;
-  background:rgba(255,255,255,.04);
-  transform:scaleX(0);transform-origin:left;
-  transition:transform .8s cubic-bezier(.16,1,.3,1);
-}
-#ct:hover::before{transform:scaleX(1)}
-.ctsl{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--stone);margin-bottom:12px}
-.ctm{
-  font-family:'Noto Serif JP',serif;
-  font-size:clamp(1.2rem,2.2vw,2rem);
-  color:var(--white);transition:color .4s;
-}
-#ct:hover .ctm{color:var(--stone)}
-.ctar{
+.h-bottom{
+  border-top:1px solid var(--rule);
+  padding-top:clamp(14px,2vw,20px);
   display:flex;align-items:center;gap:14px;
-  transition:transform .6s cubic-bezier(.16,1,.3,1);
+  opacity:0;
 }
-#ct:hover .ctar{transform:translateX(12px)}
-.ctal{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone)}
-.ctaa{font-size:2.4rem;color:var(--stone);line-height:1}
+.h-info-tag{
+  font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  background:var(--ink);color:#fff;
+  padding:3px 8px;flex-shrink:0;
+}
+.h-info-txt{
+  font-size:11px;letter-spacing:.04em;color:var(--mid);
+  font-family:'Noto Sans JP',sans-serif;font-weight:300;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 
-/* ─── Footer ──────────────────────────────────────── */
+/* Right photo panel */
+.h-r{
+  position:relative;overflow:hidden;
+}
+.h-r img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:center bottom;
+}
+/* vertical text on photo */
+.h-vtext{
+  position:absolute;
+  left:clamp(18px,2.5vw,32px);
+  top:50%;transform:translateY(-50%);
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1rem,1.8vw,1.5rem);
+  font-weight:400;
+  color:rgba(255,255,255,.92);
+  letter-spacing:.16em;
+  line-height:1.6;
+  text-shadow:0 2px 24px rgba(0,0,0,.28);
+  opacity:0;
+}
+/* right edge division labels */
+.h-divs-r{
+  position:absolute;
+  right:clamp(14px,2vw,24px);top:50%;
+  transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:clamp(14px,2vh,22px);
+  align-items:flex-end;
+  opacity:0;
+}
+.h-div-r{
+  display:flex;align-items:center;gap:10px;
+  font-size:10px;letter-spacing:.2em;
+  color:rgba(255,255,255,.5);
+  line-height:1;
+}
+.h-div-r::after{
+  content:'';width:22px;height:1px;
+  background:rgba(255,255,255,.35);flex-shrink:0;
+}
+.h-div-r.dim{color:rgba(255,255,255,.22)}
+.h-div-r.dim::after{background:rgba(255,255,255,.14)}
+
+/* ─── Slideshow section ──────────────── */
+#slides{
+  position:relative;overflow:hidden;
+  aspect-ratio:16/6.5;
+  border-bottom:1px solid var(--rule);
+}
+.slide{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity 1s ease;
+}
+.slide.on{opacity:1}
+.slide img{width:100%;height:100%;object-fit:cover}
+.s-ctrl{
+  position:absolute;bottom:clamp(16px,2.5vw,24px);
+  right:clamp(20px,3vw,40px);
+  display:flex;align-items:center;gap:20px;z-index:10;
+}
+.s-dots{display:flex;gap:7px;align-items:center}
+.s-dot{
+  width:20px;height:1px;background:rgba(255,255,255,.3);
+  cursor:pointer;border:none;padding:0;
+  transition:background .3s;
+}
+.s-dot.on{background:rgba(255,255,255,.85)}
+.s-arrow{
+  font-size:1rem;color:rgba(255,255,255,.5);
+  transition:color .2s;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;
+  font-weight:300;letter-spacing:.04em;
+  background:none;border:none;
+}
+.s-arrow:hover{color:#fff}
+.s-ctr{
+  font-size:9px;letter-spacing:.22em;color:rgba(255,255,255,.3);
+  font-family:'Instrument Sans',sans-serif;
+}
+
+/* ─── Content sections ───────────────── */
+.section{
+  padding:clamp(72px,12vw,140px) clamp(32px,7vw,96px);
+  border-bottom:1px solid var(--rule);
+}
+.sec-tag{
+  font-size:10px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--mid);margin-bottom:clamp(24px,4.5vw,48px);
+  display:flex;align-items:center;gap:14px;
+}
+.sec-tag::after{
+  content:'';flex:0 0 18px;height:1px;background:var(--rule);
+}
+
+/* Lead */
+.lead-h{
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1.8rem,4vw,5rem);
+  font-weight:400;line-height:1.3;
+  letter-spacing:.01em;color:var(--ink);
+  max-width:800px;
+  margin-bottom:clamp(24px,4vw,48px);
+}
+.lead-body{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:13px;line-height:2.3;
+  color:var(--mid);max-width:560px;font-weight:300;
+}
+
+/* Divisions */
+.div-row{
+  padding:clamp(20px,3vw,36px) 0;
+  border-top:1px solid var(--rule);
+  display:grid;
+  grid-template-columns:44px 1fr auto;
+  align-items:center;
+  gap:clamp(14px,3vw,40px);
+  cursor:pointer;
+  transition:opacity .2s;
+}
+.div-row:hover{opacity:.6}
+.div-n{
+  font-size:10px;letter-spacing:.18em;color:var(--rule);
+  font-family:'Instrument Sans',sans-serif;
+}
+.div-body{display:flex;flex-direction:column;gap:4px}
+.div-jp{
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1.5rem,2.8vw,2.8rem);
+  font-weight:400;color:var(--ink);line-height:1;
+}
+.div-en{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);
+}
+.div-desc{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:12px;line-height:1.8;color:var(--mid);
+  font-weight:300;margin-top:8px;
+}
+.div-arr{
+  font-size:1rem;color:var(--rule);
+  transition:transform .35s cubic-bezier(.16,1,.3,1);
+  font-family:'Instrument Sans',sans-serif;
+  font-weight:300;
+}
+.div-row:hover .div-arr{transform:translateX(7px);color:var(--mid)}
+.div-row.dim{opacity:.3;pointer-events:none}
+.div-soon{
+  font-size:10px;letter-spacing:.14em;font-style:italic;color:var(--rule);
+}
+
+/* Profile */
+.profile-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(40px,8vw,120px);align-items:start;
+}
+.pro-h{
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1.5rem,2.6vw,2.8rem);
+  font-weight:400;line-height:1.45;
+  color:var(--ink);margin-bottom:clamp(18px,3vw,32px);
+}
+.pro-body{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:13px;line-height:2.3;color:var(--mid);font-weight:300;
+}
+.stats{display:flex;flex-direction:column}
+.stat{
+  padding:clamp(16px,2.5vw,26px) 0;
+  border-top:1px solid var(--rule);
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+}
+.stat:first-child{border-top:none;padding-top:0}
+.stat-v{
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(2rem,4vw,4.4rem);
+  font-weight:400;color:var(--ink);line-height:1;
+}
+.stat-l{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:11px;color:var(--mid);font-weight:300;text-align:right;
+}
+
+/* Contact */
+.ct-h{
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1.5rem,3.2vw,4rem);
+  font-weight:400;line-height:1.35;
+  color:var(--ink);max-width:600px;
+  margin-bottom:clamp(24px,5vw,52px);
+}
+.ct-link{
+  display:inline-flex;align-items:center;gap:12px;
+  font-size:clamp(.85rem,1.6vw,1.2rem);
+  letter-spacing:.04em;color:var(--mid);
+  border-bottom:1px solid var(--rule);
+  padding-bottom:6px;
+  transition:color .22s,border-color .22s;
+}
+.ct-link:hover{color:var(--ink);border-color:var(--ink)}
+.ct-link-arr{
+  font-size:.9em;
+  transition:transform .3s cubic-bezier(.16,1,.3,1);
+}
+.ct-link:hover .ct-link-arr{transform:translateX(5px)}
+
+/* Footer */
 #ft{
-  background:var(--cream);padding:24px var(--pad);
+  padding:18px clamp(32px,7vw,96px);
   display:flex;align-items:center;justify-content:space-between;
-  border-top:1px solid var(--sand);
+  border-bottom:1px solid var(--rule);
 }
-.ftc{font-size:11px;letter-spacing:.1em;color:var(--stone)}
-.ftd{font-family:'Noto Sans JP',sans-serif;font-size:11px;color:var(--stone)}
+.ft-l{font-size:10px;letter-spacing:.1em;color:var(--mid)}
+.ft-r{
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:10px;color:var(--rule);font-weight:300;letter-spacing:.06em;
+}
 
-/* ─── Mobile ──────────────────────────────────────── */
-@media(max-width:860px){
-  :root{--pad:28px}
-  .nav-c{display:none}
-  .stmt-h{font-size:clamp(1.8rem,7vw,3.2rem)}
-  .bc-jp{font-size:clamp(2.4rem,10vw,5rem)}
-  .bg{font-size:clamp(10rem,40vw,20rem)}
-  #about{grid-template-columns:1fr;gap:44px}
-  .stmt-bot{flex-direction:column;gap:24px}
+/* ─── Reveal ──────────────────────────── */
+.rv{opacity:0;transform:translateY(18px)}
+
+/* ─── Mobile ──────────────────────────── */
+@media(max-width:768px){
+  :root{ --sb: 0px }
+
+  /* Sidebar → top bar */
+  #sb{
+    width:100%; height:52px;
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-right:none;
+    border-bottom:1px solid var(--rule);
+    bottom:auto;
+  }
+  .sb-top{ display:none }
+  .sb-nav{
+    flex-direction:row; flex:1;
+    justify-content:center; gap:16px;
+  }
+  .sb-ni{
+    writing-mode:horizontal-tb;
+    font-size:10.5px; letter-spacing:.04em;
+  }
+  .sb-ni:nth-child(5){ display:none }
+  .sb-bot{
+    writing-mode:horizontal-tb;
+    padding:0; font-size:9px; letter-spacing:.18em;
+  }
+
+  /* Wrap: no left margin, top padding for fixed bar */
+  #wrap{ margin-left:0; padding-top:52px }
+
+  /* Hero: stack vertically */
+  #hero{
+    grid-template-columns:1fr;
+    height:auto; min-height:auto;
+  }
+  .h-r{ height:55svh }
+  .h-vtext{ font-size:clamp(.9rem,4vw,1.2rem) }
+  .h-divs-r{ display:none }
+  .h-l{
+    min-height:auto;
+    padding:32px 24px 28px;
+    border-left:none;
+    border-top:1px solid var(--rule);
+  }
+  .h-logo{ font-size:clamp(2.4rem,11vw,4rem); line-height:.95 }
+  .h-tagline{ font-size:11px; margin-bottom:28px }
+  .h-bottom{ margin-top:24px }
+
+  /* Slideshow */
+  #slides{ aspect-ratio:4/3 }
+  .s-ctr{ display:none }
+
+  /* Sections */
+  .section{ padding:52px 24px }
+
+  /* Division rows */
+  .div-row{
+    grid-template-columns:36px 1fr 24px;
+    gap:12px; padding:20px 0;
+  }
+  .div-desc{ font-size:11px }
+
+  /* Profile */
+  .profile-grid{ grid-template-columns:1fr; gap:40px }
+
+  /* Footer */
+  #ft{ padding:16px 24px }
+
+  /* Scroll offset for fixed top bar */
+  .div-row, .section { scroll-margin-top: 60px }
 }
 </style>
 </head>
 <body>
 
-<!-- ── Loader ─────────────────────────────────────────────── -->
-<div id="loader">
-  <div id="ld-n">0</div>
-  <div id="ld-b"><div id="ld-bi">A-CRAFT&nbsp;&nbsp;GROUP</div></div>
-  <div id="ld-p"><div id="ld-f"></div></div>
-</div>
-
-<!-- ── Nav ───────────────────────────────────────────────── -->
-<nav id="nav">
-  <span class="nl">A–CRAFT&nbsp;&nbsp;GROUP</span>
-  <div class="nav-c">
-    <div class="ni"><span class="ni-j">不動産</span><span class="ni-e">Real Estate</span></div>
-    <div class="ni"><span class="ni-j">建築</span><span class="ni-e">Architecture</span></div>
-    <div class="ni"><span class="ni-j">美容</span><span class="ni-e">Beauty</span></div>
-    <div class="ni"><span class="ni-j">飲食</span><span class="ni-e">F&amp;B</span></div>
+<!-- ── Sidebar ───────────────────────────────── -->
+<aside id="sb">
+  <div class="sb-top">
+    <div class="sb-line"></div>
+    <div class="sb-line"></div>
   </div>
-  <span class="nm">Menu</span>
-</nav>
+  <nav class="sb-nav">
+    <span class="sb-ni">不動産</span>
+    <span class="sb-ni">建築</span>
+    <span class="sb-ni">美容</span>
+    <span class="sb-ni">飲食</span>
+    <span class="sb-ni">お問い合わせ</span>
+  </nav>
+  <div class="sb-bot">A-CRAFT</div>
+</aside>
 
-<!-- ── Hero ─────────────────────────────────────────────── -->
-<section id="hero">
-  <!-- Asymmetric masonry grid -->
-  <div id="hgrid">
-    <div class="hm hm1" id="hm1"><img src="グループHP トップページ写真/P1073626 3.JPG" alt="建築" loading="eager"></div>
-    <div class="hm hm2" id="hm2"><img src="グループHP トップページ写真/P1073534 2.jpg" alt="空間" loading="eager"></div>
-    <div class="hm hm3" id="hm3"><img src="グループHP トップページ写真/P1073762.jpg" alt="デザイン" loading="eager"></div>
-    <div class="hm hm4" id="hm4"><img src="グループHP トップページ写真/_DSF9720.JPG" alt="建物" loading="eager"></div>
-  </div>
+<!-- ── Page wrap ─────────────────────────────── -->
+<div id="wrap">
 
-  <div class="hg"></div>
-  <div class="hv"></div>
+  <!-- ── Hero ─────────────────────────────── -->
+  <section id="hero">
 
-  <div class="hc">
-    <div class="htag" id="hTag">
-      <span class="lm"><span class="li">お客様と未来を</span></span>
-      <span class="lm"><span class="li">共に創る。</span></span>
-    </div>
-    <div class="hbot" id="hBot">
-      <div class="hbl">
-        <span class="hco">A-CRAFT GROUP — エークラフトグループ</span>
-        <span class="hsc">Scroll</span>
-      </div>
-      <div class="hcats">
-        <span class="hcat">不動産</span>
-        <span class="hcats-sep"></span>
-        <span class="hcat">建築</span>
-        <span class="hcats-sep"></span>
-        <span class="hcat">美容</span>
-        <span class="hcats-sep"></span>
-        <span class="hcat dim">飲食</span>
+    <!-- Left panel -->
+    <div class="h-l">
+      <p class="h-tagline">
+        お客様の未来を創るパートナーとして、<br>
+        高品質なサービスと確かな技術で社会に貢献します。
+      </p>
+      <div class="h-logo">A–CRAFT<br>GROUP</div>
+      <div class="h-bottom">
+        <span class="h-info-tag">About</span>
+        <span class="h-info-txt">エークラフトグループ — 四つの領域で、ひとつの誠実さ。</span>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ── Statement ──────────────────────────────────────────── -->
-<section id="stmt">
-  <span class="stmt-wm" aria-hidden="true">間</span>
-  <div class="stmt-top">
-    <span class="stmt-sec">
-      <span class="stmt-sec-n">§ 01</span>Crafting Excellence
-    </span>
-    <span style="font-size:11px;letter-spacing:.18em;color:var(--sand)">エークラフトグループ</span>
-  </div>
-  <div class="stmt-mid">
-    <div class="stmt-h serif" id="stmtH">
-      <span class="lm"><span class="li">クラフトの精神で、</span></span>
-      <span class="lm"><span class="li">四つの領域を。</span></span>
+    <!-- Right photo panel -->
+    <div class="h-r">
+      <img src="グループHP トップページ写真/P1073849.jpg" alt="A-CRAFT GROUP" loading="eager">
+      <div class="h-vtext">お客様と未来を<br>共に創る。</div>
+      <div class="h-divs-r">
+        <span class="h-div-r">不動産</span>
+        <span class="h-div-r">建築</span>
+        <span class="h-div-r">美容</span>
+        <span class="h-div-r">飲食</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Slideshow ───────────────────────── -->
+  <div id="slides">
+    <div class="slide on">
+      <img src="グループHP トップページ写真/P1073534.jpg" alt="空間" loading="lazy">
+    </div>
+    <div class="slide">
+      <img src="グループHP トップページ写真/P1073762.jpg" alt="デザイン" loading="lazy">
+    </div>
+    <div class="slide">
+      <img src="グループHP トップページ写真/_DSF9720.JPG" alt="建物" loading="lazy">
+    </div>
+    <div class="slide">
+      <img src="グループHP トップページ写真/P1073799.jpg" alt="空間" loading="lazy">
+    </div>
+    <div class="s-ctrl">
+      <button class="s-arrow" id="sarr-l">←</button>
+      <div class="s-dots">
+        <button class="s-dot on"></button>
+        <button class="s-dot"></button>
+        <button class="s-dot"></button>
+        <button class="s-dot"></button>
+      </div>
+      <button class="s-arrow" id="sarr-r">→</button>
+      <span class="s-ctr">1 / 4</span>
     </div>
   </div>
-  <div class="stmt-bot">
-    <p class="stmt-body noto">
-      不動産・建築・美容・飲食。それぞれ異なる領域でありながら、A-CRAFTグループは一貫した職人の精神でお客様と向き合います。空間をつくることも、美しさを追求することも、根底にあるのはひとつの問いです——より良いものを、丁寧に。
+
+  <!-- ── Lead ───────────────────────────── -->
+  <section class="section">
+    <div class="sec-tag rv">Crafting Excellence</div>
+    <h2 class="lead-h rv">お客様の未来を創る、<br>パートナーとして。</h2>
+    <p class="lead-body rv" style="font-family:'Noto Sans JP',sans-serif;font-weight:300">
+      株式会社エークラフトは、内装工事を中心に美容室・飲食店運営を展開する企業です。高品質なサービスでお客様の期待に応え、信頼されるパートナーを目指します。常にお客様の視点に立ち、不動産・建築・美容・飲食の四つの領域で、お客様の暮らしと空間をトータルに支えます。
     </p>
-    <span class="stmt-yr">Est. ——— 2015</span>
-  </div>
-</section>
+  </section>
 
-<!-- ── Business ────────────────────────────────────────────── -->
-<div class="sband">
-  <span class="sband-l">§ 02 &nbsp; Business Divisions</span>
-  <span class="sband-r">4 Sectors</span>
-</div>
-<section id="biz-section">
-  <div id="biz-pin">
-    <div id="biz-track">
+  <!-- ── Business Divisions ──────────────── -->
+  <section class="section" style="padding-top:0">
+    <div class="sec-tag rv">Business Divisions</div>
 
-      <div class="bp"><span class="bg" aria-hidden="true">不</span>
-        <div class="bc">
-          <div class="bc-num">01 &nbsp; Real Estate</div>
-          <div class="bc-jp serif"><span class="bc-jp-i">不動産</span></div>
-          <div class="bc-rule"></div>
-          <div class="bc-en">Real Estate</div>
-          <p class="bc-desc noto">物件の売買・賃貸・管理まで、お客様の不動産をトータルサポート。長年の実績と地域密着のネットワークで、最適な空間をご提案します。</p>
+    <a class="div-row rv" id="div-realestate" href="https://a-living.co.jp" target="_blank" rel="noopener">
+      <span class="div-n">01</span>
+      <div class="div-body">
+        <span class="div-jp" style="font-family:'Noto Serif JP',serif">不動産</span>
+        <span class="div-en">Real Estate</span>
+        <span class="div-desc">物件の売買・賃貸・管理まで、お客様の不動産をトータルサポート。</span>
+      </div>
+      <span class="div-arr">→</span>
+    </a>
+
+    <a class="div-row rv" id="div-architecture" href="https://a-craft.tokyo/renovation" target="_blank" rel="noopener">
+      <span class="div-n">02</span>
+      <div class="div-body">
+        <span class="div-jp" style="font-family:'Noto Serif JP',serif">建築</span>
+        <span class="div-en">Architecture</span>
+        <span class="div-desc">オフィス・店舗・住宅の内装工事。千葉・東京・神奈川など近郊対応。</span>
+      </div>
+      <span class="div-arr">→</span>
+    </a>
+
+    <a class="div-row rv" id="div-beauty" href="#">
+      <span class="div-n">03</span>
+      <div class="div-body">
+        <span class="div-jp" style="font-family:'Noto Serif JP',serif">美容</span>
+        <span class="div-en">Beauty</span>
+        <span class="div-desc">千葉市内でMOND・OMAを展開。全席個室でリラックスできる美容室。</span>
+      </div>
+      <span class="div-arr">→</span>
+    </a>
+
+    <a class="div-row rv" id="div-food" href="https://tabelog.com/chiba/A1201/A120102/12052306/" target="_blank" rel="noopener">
+      <span class="div-n">04</span>
+      <div class="div-body">
+        <span class="div-jp" style="font-family:'Noto Serif JP',serif">飲食</span>
+        <span class="div-en">Food &amp; Beverage</span>
+        <span class="div-desc">幕張のスペインバル「カラモンジョイ」。本格料理とくつろぎの空間。</span>
+      </div>
+      <span class="div-arr">→</span>
+    </a>
+  </section>
+
+  <!-- ── Profile ─────────────────────────── -->
+  <section class="section">
+    <div class="sec-tag rv">About</div>
+    <div class="profile-grid">
+      <div>
+        <h2 class="pro-h rv" style="font-family:'Noto Serif JP',serif">企業理念</h2>
+        <p class="pro-body rv">
+          株式会社エークラフトは、お客様の未来を創るパートナーとして、高品質なサービスと確かな技術で社会に貢献しています。常にお客様の視点に立ち、信頼される企業を目指します。<br><br>
+          代表取締役：石井 良享<br>
+          〒140-0013 東京都品川区南大井1丁目19番5号 クオレ南大井301
+        </p>
+      </div>
+      <div class="stats rv">
+        <div class="stat">
+          <span class="stat-v" style="font-family:'Noto Serif JP',serif">4</span>
+          <span class="stat-l" style="font-family:'Noto Sans JP',sans-serif">事業部門</span>
+        </div>
+        <div class="stat">
+          <span class="stat-v" style="font-family:'Noto Serif JP',serif">100<span style="font-size:.5em;vertical-align:.2em">+</span></span>
+          <span class="stat-l" style="font-family:'Noto Sans JP',sans-serif">実績プロジェクト</span>
+        </div>
+        <div class="stat">
+          <span class="stat-v" style="font-family:'Noto Serif JP',serif">2022</span>
+          <span class="stat-l" style="font-family:'Noto Sans JP',sans-serif">設立年</span>
         </div>
       </div>
-
-      <div class="bp"><span class="bg" aria-hidden="true">建</span>
-        <div class="bc">
-          <div class="bc-num">02 &nbsp; Architecture</div>
-          <div class="bc-jp serif"><span class="bc-jp-i">建築</span></div>
-          <div class="bc-rule"></div>
-          <div class="bc-en">Architecture</div>
-          <p class="bc-desc noto">空間設計から施工まで、こだわりの建築をワンストップで提供。素材の選定から細部の納まりまで、職人の眼で品質を追求します。</p>
-        </div>
-      </div>
-
-      <div class="bp"><span class="bg" aria-hidden="true">美</span>
-        <div class="bc">
-          <div class="bc-num">03 &nbsp; Beauty</div>
-          <div class="bc-jp serif"><span class="bc-jp-i">美容</span></div>
-          <div class="bc-rule"></div>
-          <div class="bc-en">Beauty</div>
-          <p class="bc-desc noto">上質な空間と確かな技術で、お客様の美しさを丁寧に引き出すサロン運営。日常に、特別な時間を。</p>
-        </div>
-      </div>
-
-      <div class="bp"><span class="bg" aria-hidden="true">食</span>
-        <div class="bc">
-          <div class="bc-num">04 &nbsp; Food &amp; Beverage</div>
-          <div class="bc-jp serif"><span class="bc-jp-i">飲食</span></div>
-          <div class="bc-rule"></div>
-          <div class="bc-en">Food &amp; Beverage</div>
-          <p class="bc-coming">— Coming Soon —</p>
-        </div>
-      </div>
-
     </div>
-    <div id="bhud">
-      <div id="bprog"><div id="bpf"></div></div>
-      <span id="bcur">01 / 04</span>
-    </div>
-    <div class="bscrh">Scroll</div>
-  </div>
-</section>
+  </section>
 
-<!-- ── Marquee ─────────────────────────────────────────────── -->
-<div id="mq">
-  <div class="mqt">
-    <div class="mqti" id="mqti">
-      <div class="mqi"><span class="mqj hi">不動産</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">建築</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">美容</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">飲食</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj" style="font-size:clamp(.8rem,1.6vw,1.3rem);letter-spacing:.36em;color:rgba(250,248,244,.04)">A-CRAFT GROUP</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj hi">不動産</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">建築</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">美容</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj">飲食</span><span class="mqs-sep">—</span></div>
-      <div class="mqi"><span class="mqj" style="font-size:clamp(.8rem,1.6vw,1.3rem);letter-spacing:.36em;color:rgba(250,248,244,.04)">A-CRAFT GROUP</span><span class="mqs-sep">—</span></div>
-    </div>
-  </div>
-</div>
+  <!-- ── Contact ─────────────────────────── -->
+  <section class="section" id="sec-contact">
+    <div class="sec-tag rv">Contact</div>
+    <h2 class="ct-h rv" style="font-family:'Noto Serif JP',serif">お気軽に<br>ご相談ください。</h2>
+    <a class="ct-link rv" href="mailto:info@a-craft-group.jp">
+      info@a-craft-group.jp
+      <span class="ct-link-arr">→</span>
+    </a>
+  </section>
 
-<!-- ── About ───────────────────────────────────────────────── -->
-<section id="about">
-  <div>
-    <div class="asec"><span style="color:var(--stone)">§ 03</span>&nbsp;About</div>
-    <div class="ahead serif" id="aboutH">
-      <span class="lm"><span class="li">四つの視点で、</span></span>
-      <span class="lm"><span class="li">ひとつの誠実さ。</span></span>
-    </div>
-    <p class="abody noto">A-CRAFTグループは、不動産・建築・美容・飲食の四つの事業を通じて、お客様の暮らしと空間をトータルに支える会社です。<br><br>ものをつくる人、空間をデザインする人、美しさを追求する人——それぞれの職人的な精神を大切にしながら、お客様と共に未来を創ります。</p>
-  </div>
-  <div class="aright">
-    <div class="sti"><div class="stv serif" id="stat0">4</div><div class="stl noto">事業部門</div></div>
-    <div class="sti"><div class="stv serif" id="stat1">100<span style="font-size:.55em">+</span></div><div class="stl noto">実績プロジェクト</div></div>
-    <div class="sti"><div class="stv serif" id="stat2">2015</div><div class="stl noto">創業年</div></div>
-  </div>
-</section>
+  <!-- ── Footer ──────────────────────────── -->
+  <footer id="ft">
+    <span class="ft-l">© A-CRAFT GROUP</span>
+    <span class="ft-r" style="font-family:'Noto Sans JP',sans-serif">不動産 · 建築 · 美容 · 飲食</span>
+  </footer>
 
-<!-- ── Contact ─────────────────────────────────────────────── -->
-<div class="sband" style="background:rgba(14,13,12,.97)">
-  <span class="sband-l">§ 04 &nbsp; Contact</span>
-  <span class="sband-r">Get in Touch</span>
-</div>
-<section id="ct">
-  <div>
-    <p class="ctsl">お問い合わせ</p>
-    <p class="ctm serif">info@a-craft-group.jp</p>
-  </div>
-  <div class="ctar">
-    <span class="ctal">Get in touch</span>
-    <span class="ctaa">→</span>
-  </div>
-</section>
-
-<!-- ── Footer ──────────────────────────────────────────────── -->
-<footer id="ft">
-  <span class="ftc">© A-CRAFT GROUP</span>
-  <span class="ftd noto">不動産 · 建築 · 美容 · 飲食</span>
-</footer>
+</div><!-- /wrap -->
 
 <script>
-/* ════════════════════════════════════════════════════
-   HERO MASONRY — mouse parallax
-   ════════════════════════════════════════════════════ */
-(function(){
-  const imgs   = document.querySelectorAll('.hm img');
-  const depths = [0.014, 0.022, 0.018, 0.010]; /* parallax depth per cell */
-  let mx = 0.5, my = 0.5;
-  let smx = 0.5, smy = 0.5;
+gsap.registerPlugin(ScrollTrigger);
 
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX / window.innerWidth;
-    my = e.clientY / window.innerHeight;
+/* ── Hero entrance ───────────────────── */
+window.addEventListener('load', () => {
+  const tl = gsap.timeline({ defaults:{ ease:'power3.out' } });
+  tl.to('.h-tagline', { opacity:1, duration:1.0, delay:0.1 })
+    .to('.h-logo',    { opacity:1, duration:1.1 }, '-=0.7')
+    .to('.h-bottom',  { opacity:1, duration:0.9 }, '-=0.6')
+    .to('.h-vtext',   { opacity:1, duration:1.0 }, '-=0.8')
+    .to('.h-divs-r',  { opacity:1, duration:0.8 }, '-=0.7');
+});
+
+/* ── Scroll reveals ──────────────────── */
+document.querySelectorAll('.rv').forEach(el => {
+  gsap.to(el, {
+    opacity:1, y:0,
+    duration:0.85, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 90%', once:true }
   });
+});
 
-  function tick() {
-    smx += (mx - smx) * 0.04;
-    smy += (my - smy) * 0.04;
-    const dx = smx - 0.5;
-    const dy = smy - 0.5;
-    imgs.forEach((img, i) => {
-      const d = depths[i] * 100;
-      img.style.transform = `translate(${dx * -d}px, ${dy * -d}px) scale(1.06)`;
-    });
-    requestAnimationFrame(tick);
+/* ── Slideshow ───────────────────────── */
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.s-dot');
+  const ctr    = document.querySelector('.s-ctr');
+  let cur = 0, timer;
+
+  function go(n) {
+    slides[cur].classList.remove('on');
+    dots[cur].classList.remove('on');
+    cur = (n + slides.length) % slides.length;
+    slides[cur].classList.add('on');
+    dots[cur].classList.add('on');
+    ctr.textContent = (cur + 1) + ' / ' + slides.length;
   }
-  tick();
+
+  function startAuto() {
+    clearInterval(timer);
+    timer = setInterval(() => go(cur + 1), 4500);
+  }
+
+  document.getElementById('sarr-r').addEventListener('click', () => { go(cur + 1); startAuto(); });
+  document.getElementById('sarr-l').addEventListener('click', () => { go(cur - 1); startAuto(); });
+  dots.forEach((d, i) => d.addEventListener('click', () => { go(i); startAuto(); }));
+
+  startAuto();
 })();
 
-/* ════════════════════════════════════════════════════
-   LENIS
-   ════════════════════════════════════════════════════ */
-const lenis = new Lenis({ lerp: 0.075, smoothWheel: true });
-lenis.on('scroll', ScrollTrigger.update);
-gsap.ticker.add(t => lenis.raf(t * 1000));
-gsap.ticker.lagSmoothing(0);
-
-/* ════════════════════════════════════════════════════
-   LOADER
-   ════════════════════════════════════════════════════ */
+/* ── Nav smooth scroll ───────────────── */
 (function(){
-  const nEl = document.getElementById('ld-n');
-  const bEl = document.getElementById('ld-bi');
-  const fEl = document.getElementById('ld-f');
-  const lEl = document.getElementById('loader');
-  let pct = 0, done = false;
-
-  gsap.to(bEl, { translateY: 0, duration: 1.0, ease: 'power3.out', delay: 0.2 });
-
-  const tick = setInterval(() => {
-    pct += Math.random() * 10 + 4;
-    if (pct >= 100) { pct = 100; clearInterval(tick); }
-    nEl.textContent = Math.floor(pct);
-    fEl.style.right = (100 - pct) + '%';
-    if (pct >= 100 && !done) { done = true; setTimeout(exit, 250); }
-  }, 55);
-
-  function exit() {
-    gsap.to(nEl, { scale: 1.06, opacity: 0, duration: 0.48, ease: 'power2.in' });
-    gsap.to(bEl, { opacity: 0, duration: 0.32, delay: 0.06 });
-    gsap.to(lEl, {
-      y: '-100%', duration: 0.96, ease: 'expo.inOut', delay: 0.36,
-      onComplete() { lEl.style.display = 'none'; startHero(); }
-    });
-  }
+  const map = {
+    '不動産': '#div-realestate',
+    '建築':   '#div-architecture',
+    '美容':   '#div-beauty',
+    '飲食':   '#div-food',
+    'お問い合わせ': '#sec-contact'
+  };
+  document.querySelectorAll('.sb-ni').forEach(el => {
+    const target = map[el.textContent.trim()];
+    if (target) {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => {
+        document.querySelector(target)?.scrollIntoView({ behavior:'smooth', block:'start' });
+      });
+    }
+  });
 })();
-
-/* ════════════════════════════════════════════════════
-   HERO ENTRANCE
-   ════════════════════════════════════════════════════ */
-function startHero() {
-  gsap.registerPlugin(ScrollTrigger);
-
-  /* Masonry cells clip-reveal (bottom → up) */
-  const cells = document.querySelectorAll('.hm');
-  gsap.fromTo(cells,
-    { clipPath: 'inset(0 0 100% 0)' },
-    {
-      clipPath: 'inset(0 0 0% 0)',
-      duration: 1.5, ease: 'expo.out',
-      stagger: { each: 0.09, from: 'start' },
-      delay: 0.05
-    }
-  );
-
-  /* Tagline reveal */
-  gsap.to('#hTag .li', {
-    translateY: '0%', duration: 1.15, ease: 'power4.out', stagger: 0.15, delay: 0.6
-  });
-  gsap.to('#hBot', { opacity: 1, duration: 1.0, ease: 'power3.out', delay: 1.3 });
-
-  initScroll();
-}
-
-/* ════════════════════════════════════════════════════
-   SCROLL ANIMATIONS
-   ════════════════════════════════════════════════════ */
-function initScroll() {
-
-  /* Velocity skew */
-  const clamp = gsap.utils.clamp(-4, 4);
-  const prx = { s: 0 };
-  ScrollTrigger.create({
-    onUpdate(self) {
-      const v = clamp(self.getVelocity() / -580);
-      if (Math.abs(v) > Math.abs(prx.s)) {
-        prx.s = v;
-        gsap.to(prx, {
-          s: 0, duration: 1.5, ease: 'power3', overwrite: true,
-          onUpdate() {
-            document.querySelectorAll('.stmt-h,.bc-jp,.mqj,.ahead')
-              .forEach(el => gsap.set(el, { skewY: prx.s }));
-          }
-        });
-      }
-    }
-  });
-
-  /* Statement lines */
-  document.querySelectorAll('#stmtH .li').forEach((el, i) => {
-    gsap.fromTo(el, { translateY: '108%' }, {
-      translateY: '0%', duration: 1.2, ease: 'power4.out', delay: i * 0.1,
-      scrollTrigger: { trigger: el.closest('.lm'), start: 'top 89%', once: true }
-    });
-  });
-  gsap.from('.stmt-body', {
-    opacity: 0, y: 18, duration: 1.0, ease: 'power3.out',
-    scrollTrigger: { trigger: '#stmt', start: 'top 78%', once: true }
-  });
-
-  /* Business pinned */
-  const pin    = document.getElementById('biz-pin');
-  const track  = document.getElementById('biz-track');
-  const bpf    = document.getElementById('bpf');
-  const bcurEl = document.getElementById('bcur');
-  const panels = document.querySelectorAll('.bp');
-  const jpInners = document.querySelectorAll('.bc-jp-i');
-  const hudEl  = document.getElementById('bhud');
-  const scrhEl = document.querySelector('.bscrh');
-
-  gsap.to(track, {
-    x: () => -(window.innerWidth * 3),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: pin, pin: true,
-      start: 'top top',
-      end: () => `+=${window.innerWidth * 3}`,
-      scrub: 1.3, invalidateOnRefresh: true,
-      onUpdate(s) {
-        const p   = s.progress;
-        const idx = Math.min(Math.floor(p * 4), 3);
-
-        bpf.style.right = (100 - p * 100) + '%';
-        bcurEl.textContent = String(idx + 1).padStart(2, '0') + ' / 04';
-        panels.forEach((panel, i) => panel.classList.toggle('lit', i <= idx));
-
-        /* JP text reveals per panel */
-        jpInners.forEach((el, i) => {
-          const panelP = Math.max(0, Math.min(1, (p * 4) - i));
-          gsap.set(el, { translateY: panelP > 0.3 ? '0%' : '100%' });
-        });
-
-        /* HUD color adapts to dark/light panel */
-        const dark = (idx % 2 === 1);
-        bcurEl.style.color       = dark ? 'rgba(255,255,255,.3)'  : 'var(--stone)';
-        bpf.style.background = dark ? 'rgba(255,255,255,.45)' : 'var(--stone)';
-        document.getElementById('bprog').style.background = dark ? 'rgba(255,255,255,.09)' : 'rgba(14,13,12,.09)';
-        scrhEl.style.color = dark ? 'rgba(255,255,255,.18)' : 'rgba(14,13,12,.2)';
-      }
-    }
-  });
-
-  /* Marquee */
-  const mqti = document.getElementById('mqti');
-  document.getElementById('mq').addEventListener('mouseenter', () => mqti.style.animationPlayState = 'paused');
-  document.getElementById('mq').addEventListener('mouseleave', () => mqti.style.animationPlayState = 'running');
-
-  /* About */
-  document.querySelectorAll('#aboutH .li').forEach((el, i) => {
-    gsap.fromTo(el, { translateY: '108%' }, {
-      translateY: '0%', duration: 1.15, ease: 'power4.out', delay: i * 0.1,
-      scrollTrigger: { trigger: el.closest('.lm'), start: 'top 88%', once: true }
-    });
-  });
-  gsap.from('.abody', {
-    opacity: 0, y: 18, duration: 1.0, ease: 'power3.out',
-    scrollTrigger: { trigger: '#about', start: 'top 80%', once: true }
-  });
-
-  /* Stats */
-  function cntUp(el, target, fmt) {
-    const o = { v: 0 };
-    gsap.to(o, {
-      v: target, duration: 2.0, ease: 'power2.out',
-      onUpdate() { el.innerHTML = fmt(Math.round(o.v)); },
-      scrollTrigger: { trigger: '#about', start: 'top 76%', once: true }
-    });
-  }
-  cntUp(document.getElementById('stat0'), 4,    n => n);
-  cntUp(document.getElementById('stat1'), 100,  n => n + '<span style="font-size:.55em">+</span>');
-  cntUp(document.getElementById('stat2'), 2015, n => n);
-  gsap.from('.sti', {
-    opacity: 0, y: 22, duration: 1.0, ease: 'power3.out', stagger: 0.13,
-    scrollTrigger: { trigger: '#about', start: 'top 78%', once: true }
-  });
-
-  /* Contact */
-  gsap.from('#ct > div:first-child', {
-    opacity: 0, x: -20, duration: 1.0, ease: 'power3.out',
-    scrollTrigger: { trigger: '#ct', start: 'top 88%', once: true }
-  });
-
-  /* Nav light */
-  const navEl = document.getElementById('nav');
-  ScrollTrigger.create({
-    trigger: '#stmt', start: 'top 64px',
-    onEnter()    { navEl.classList.add('light') },
-    onLeaveBack(){ navEl.classList.remove('light') }
-  });
-}
 </script>
 </body>
 </html>
